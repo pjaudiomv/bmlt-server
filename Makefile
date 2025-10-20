@@ -75,20 +75,12 @@ $(FRONTEND): $(NODE_MODULES)
 	cd src && npm run build
 
 $(LEGACY_STATIC_FILES):
-	rsync -a -m \
-	    --include='**/*.js' \
-	    --include='**/*.css' \
-	    --include='**/*.png' \
-	    --include='**/*.svg' \
-	    --include='**/*.ttf' \
-	    --include='**/*.woff' \
-	    --include='**/*.woff2' \
-	    --include='**/*.eot'  \
-	    --include='**/*.json' \
-	    --include='**/*.gif' \
-	    --include='*/' \
-	    --exclude='*' \
-	    src/legacy/ src/public
+	find src/legacy -name '*.js' -o -name '*.css' -o -name '*.png' -o -name '*.svg' -o -name '*.ttf' -o -name '*.woff' -o -name '*.woff2' -o -name '*.eot' -o -name '*.json' -o -name '*.gif' | while read file; do \
+		mkdir -p "src/public/$${file#src/legacy/}" && rmdir "src/public/$${file#src/legacy/}" 2>/dev/null; \
+		mkdir -p "src/public/$$(dirname "$${file#src/legacy/}")"; \
+		cp "$$file" "src/public/$${file#src/legacy/}"; \
+	done
+	touch $(LEGACY_STATIC_FILES)
 
 $(ZIP_FILE): $(VENDOR_AUTOLOAD) $(FRONTEND) $(CROUTON_JS) $(SEMANTIC_HTML) $(TIMEZONE_ASSETS) $(LEGACY_STATIC_FILES)
 	mkdir -p build
