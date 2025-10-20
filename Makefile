@@ -179,6 +179,21 @@ mysql:  ## Runs mysql cli in mysql container
 bash:  ## Runs bash shell in apache container
 	docker exec -it -w /var/www/html/main_server docker-bmlt-1 bash
 
+.PHONY: cloud-composer
+cloud-composer: ## Composer install for Laravel Cloud
+	composer install --working-dir=src --no-dev --optimize-autoloader
+
+.PHONY: cloud-npm
+cloud-npm:  ## NPM install for Laravel Cloud
+	cd src && npm ci
+
+.PHONY: cloud-frontend
+cloud-frontend: cloud-npm  ## Build frontend for Laravel Cloud
+	cd src && npm run build
+
+.PHONY: cloud-build
+cloud-build: cloud-composer cloud-frontend $(CROUTON_JS) $(SEMANTIC_HTML) $(TIMEZONE_ASSETS) $(LEGACY_STATIC_FILES)  ## Full build for Laravel Cloud
+
 .PHONY: clean
 clean:  ## Clean build
 	rm -rf src/public/build
